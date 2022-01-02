@@ -8,8 +8,10 @@ When you are in the ARCH ISO, run the following command in your terminal screen.
 curl -L https://github.com/71zenith/autoarch/raw/master/pre | sh
 ```
 
-If you think that something could be written better, do a pull request.
+## Pull Request
 
-***Warning***
+If you think that something could be written in a better way then, do a pull request. I am all for improvement.
 
-⚠️ There are some things which are specific to my system so don't complain about those things.
+## ***Warning***
+
+⚠️ There are some things which are specific to my system so don't complain about those things. They will not be changed. Fork if you can't withstand it.
