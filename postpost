@@ -1,0 +1,39 @@
+#! /bin/sh
+mkdir -p ~/{pix,dl,mc,stuff}
+git clone https://github.com/71zenith/dotfiles.git ~/dotfiles
+cp -r ~/dotfiles/. ~/.config/
+git clone https://github.com/71zenith/scripts.git ~/.local/
+rm -rf ~/dotfiles
+cd ~/stuff
+git clone https://github.com/brodierobertson/dotfiles brodie
+git clone https://github.com/lukesmithxyz/voidrice luke
+git clone https://gitlab.com/dwt1/dotfiles.git dt
+git clone https://github.com/71zenith/autoarch
+git clone https://github.com/71zenith/st
+git clone https://github.com/71zenith/slock
+git clone https://github.com/71zenith/dmenu
+cd /tmp
+git clone https://github.com/cdown/clipmenu
+cd clipmenu
+doas make install
+cd ~/stuff/autoarch
+git remote set-url origin git@github.com:71zenith/autoarch
+cd ~/stuff/dmenu
+git remote set-url origin git@github.com:71zenith/dmenu
+make
+doas make install
+
+cd ~/stuff/slock
+git remote set-url origin git@github.com:71zenith/slock
+make
+doas make install
+
+cd ~/stuff/st
+git remote set-url origin git@github.com:71zenith/st
+make
+doas make install
+cd ~/.config
+git remote set-url origin git@github.com:71zenith/dotfiles
+cd ~/.local
+git remote set-url origin git@github.com:71zenith/scripts
+nvim "+PlugInstall | qa"

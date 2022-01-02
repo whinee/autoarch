@@ -1,0 +1,22 @@
+#! /bin/sh
+setfont ter-122n
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
+
+# preparing the disks
+mkfs.fat -F32 /dev/sdb1
+mkswap /dev/sdb2 -L "Swap"
+yes | mkfs.ext4 /dev/sdb3 -L "Arch"
+yes | mkfs.ext4 /dev/sdb4
+mount /dev/sdb3 /mnt
+mkdir /mnt/{boot,home}
+mount /dev/sdb1 /mnt/boot
+mount /dev/sdb4 /mnt/home
+swapon /dev/sdb2
+ 
+# installing the base system
+pacstrap /mnt amd-ucode base bspwm fish git linux-lts man moc neovim networkmanager nvidia-lts opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot openssh sxhkd sxiv terminus-font ttf-jetbrains-mono xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron pop-gtk-theme pop-icon-theme xsel nodejs yarn rust rust-analyzer supertuxkart ttf-nerd-fonts-symbols make patch pkgconf clipnotify noto-fonts-emoji
+genfstab -U /mnt >> /mnt/etc/fstab
+curl -L https://github.com/71zenith/autoarch/raw/master/post > /mnt/post
+arch-chroot /mnt sh post
+rm -rf /mnt/post
+reboot

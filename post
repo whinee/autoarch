@@ -1,0 +1,33 @@
+#! /bin/sh
+
+ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "FONT=ter-122n" > /etc/vconsole.conf
+echo "levi" >> /etc/hostname
+echo -e "127.0.0.1    localhost\n::1          localhost\n127.0.1.1    levi" >> /etc/hosts
+echo "permit :wheel
+permit nopass :wheel" >> /etc/doas.conf
+bootctl install
+echo -e "default arch.conf\ntimeout 0" > /boot/loader/loader.conf
+echo -e "title   Arch Linux\nlinux   /vmlinuz-linux-lts\ninitrd  /amd-ucode.img\ninitrd  /initramfs-linux-lts.img\noptions root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
+systemctl enable NetworkManager
+systemctl enable cronie.service
+useradd -m zenith71 -G wheel,audio,video
+pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+pacman-key --lsign-key FBA220DFC880C036
+pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
+pacman -Sy --noconfirm zoom polybar lf starship-git neovim-plug brave-bin alacritty-git neovide-git picom-ibhagwan-git
+yes | pacman -S libxft-bgra
+sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -e 's/vim.*/vim:ft=sh/' -i /etc/mkinitcpio.conf
+mkinitcpio -p linux-lts
+curl -L https://github.com/71zenith/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
+echo "*/30 * * * *  /usr/bin/pacman -Syuw --noconfirm" | crontab -
+passwd
+passwd zenith71
+curl -L https://github.com/71zenith/autoarch/raw/master/postpost > /home/zenith71/postpost
+su -c "sh /home/zenith71/postpost" zenith71
+chsh zenith71 -s /bin/fish
+rm -rf /home/zenith71/{.bash_history,.bash_profile,.bash_logout,.bashrc,postpost}
