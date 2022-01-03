@@ -1,4 +1,6 @@
 #! /bin/sh
+# setting up cron jobs
+echo "*/30 * * * *  /home/zenith71/.local/bin/notify_update" | crontab -
 # making directories
 mkdir -p ~/{pix,dl,mc,stuff}
 # cloning the dotfiles repo and moving it to ~/.config

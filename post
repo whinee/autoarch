@@ -35,8 +35,6 @@ sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystem
 mkinitcpio -p linux-lts
 # downloading and putting xorg.conf to /etc/X11
 curl -L https://github.com/71zenith/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
-# setting up cronjobs
-echo "*/30 * * * *  /usr/bin/pacman -Syuw --noconfirm" | crontab -
 # asking for password
 passwd
 passwd zenith71
