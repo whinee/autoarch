@@ -14,6 +14,19 @@ echo -e "127.0.0.1    localhost\n::1          localhost\n127.0.1.1    levi" >> /
 # setting up doas
 echo "permit :wheel
 permit nopass :wheel" >> /etc/doas.conf
+# changing /bin/sh to dash
+ln -sfT dash /usr/bin/sh
+echo "[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = bash
+
+[Action]
+Description = Re-pointing /bin/sh symlink to dash...
+When = PostTransaction
+Exec = /usr/bin/ln -sfT dash /usr/bin/sh
+Depends = dash" > /usr/share/libalpm/hooks/dashbinsh.hook
 # setting up systemd-boot
 bootctl install
 echo -e "default arch.conf\ntimeout 0" > /boot/loader/loader.conf
