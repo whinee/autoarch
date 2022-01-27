@@ -1,12 +1,14 @@
-#! /bin/sh
+#!/bin/sh
 # setting up cron jobs
 echo "*/30 * * * *  /home/zenith71/.local/bin/notify_update" | crontab -
 # making directories
-mkdir -p ~/{pix,dl,mc,stuff}
+mkdir -p ~/pix ~/dl ~/mc ~/stuff
 # cloning the dotfiles repo and moving it to ~/.config
 git clone https://github.com/71zenith/dotfiles.git ~/dotfiles
 cp -r ~/dotfiles/. ~/.config/
 rm -rf ~/dotfiles
+# linking zshenv to the home directory
+ln -s ~/.config/zsh/.zshenv .zshenv
 # cloning the scripts repo to ~/.local
 git clone https://github.com/71zenith/scripts.git ~/.local/
 # cloning a bunch of repo

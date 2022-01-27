@@ -1,12 +1,13 @@
-#! /bin/sh
+#!/bin/sh
 
 # setting the locale and timezone
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
-# setting the tty font
-echo "FONT=ter-122n" > /etc/vconsole.conf
+# setting the tty keyboard
+echo -e "keycode 1 = Caps_Lock\nkeycode 58 = Escape" > /usr/share/kbd/keymaps/caps-esc.map
+echo -e "FONT=ter-122n\nKEYMAP=caps-esc" > /etc/vconsole.conf
 # setting the hostname
 echo "levi" >> /etc/hostname
 # setting the hosts file
@@ -41,7 +42,7 @@ pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
 pacman-key --lsign-key FBA220DFC880C036
 pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
-pacman -Sy --noconfirm zoom polybar lf starship-git neovim-plug brave-bin alacritty-git picom-ibhagwan-git fish-autopair
+pacman -Sy --noconfirm zoom polybar lf starship-git neovim-plug brave-bin picom-ibhagwan-git
 yes | pacman -S libxft-bgra
 # setting my mkinitcpio for hibernate feature
 sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -e 's/vim.*/vim:ft=sh/' -i /etc/mkinitcpio.conf
@@ -55,7 +56,7 @@ passwd zenith71
 curl -L https://github.com/71zenith/autoarch/raw/master/postpost > /home/zenith71/postpost
 # running the script as the user
 su -c "sh /home/zenith71/postpost" zenith71
-# changing the default shell of user to fish
-chsh zenith71 -s /bin/fish
+# changing the default shell of user to zsh
+chsh zenith71 -s /bin/zsh
 # cleanup
 rm -rf /home/zenith71/{.bash_history,.bash_profile,.bash_logout,.bashrc,postpost}
