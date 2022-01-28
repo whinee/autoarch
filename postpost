@@ -7,8 +7,6 @@ mkdir -p ~/pix ~/dl ~/mc ~/stuff
 git clone https://github.com/71zenith/dotfiles.git ~/dotfiles
 cp -r ~/dotfiles/. ~/.config/
 rm -rf ~/dotfiles
-# linking zshenv to the home directory
-ln -s ~/.config/zsh/.zshenv .zshenv
 # cloning the scripts repo to ~/.local
 git clone https://github.com/71zenith/scripts.git ~/.local/
 # cloning a bunch of repo
@@ -18,6 +16,7 @@ git clone https://github.com/lukesmithxyz/voidrice luke
 git clone https://gitlab.com/dwt1/dotfiles.git dt
 git clone https://github.com/71zenith/autoarch
 git clone https://github.com/71zenith/st
+git clone https://github.com/71zenith/71zenith profile
 git clone https://github.com/71zenith/71zenith.github.io startpage
 git clone https://github.com/71zenith/slock
 git clone https://github.com/71zenith/dmenu
@@ -53,5 +52,7 @@ cd ~/.config
 git remote set-url origin git@github.com:71zenith/dotfiles
 cd ~/.local
 git remote set-url origin git@github.com:71zenith/scripts
+cd ~/stuff/profile
+git remote set-url origin git@github.com:71zenith/71zenith
 # installing plugins for nvim
 nvim "+PlugInstall | qa"
