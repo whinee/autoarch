@@ -13,7 +13,6 @@ git clone https://github.com/71zenith/scripts.git ~/.local/
 cd ~/stuff
 git clone https://github.com/brodierobertson/dotfiles brodie
 git clone https://github.com/lukesmithxyz/voidrice luke
-git clone https://gitlab.com/dwt1/dotfiles.git dt
 git clone https://github.com/71zenith/autoarch
 git clone https://github.com/71zenith/st
 git clone https://github.com/71zenith/71zenith profile
@@ -24,6 +23,11 @@ git clone https://github.com/71zenith/dmenu
 cd /tmp
 git clone https://github.com/cdown/clipmenu
 cd clipmenu
+doas make install
+# compiling mpv-mpris
+cd /tmp
+git clone https://github.com/hoyon/mpv-mpris
+cd mpv-mpris
 doas make install
 # setting up the url for push
 cd ~/stuff/autoarch
