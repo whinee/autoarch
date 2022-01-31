@@ -37,6 +37,9 @@ echo "ZDOTDIR=/home/zenith71/.config/zsh" >> /etc/environment
 # enabling networkmanager and cronie
 systemctl enable NetworkManager
 systemctl enable cronie.service
+# bluetooth
+modprobe btusb
+systemctl enable bluetooth.service
 # adding the user and assigning groups
 useradd -m zenith71 -G wheel,audio,video
 # adding chaotic-aur repo and downloading packages
