@@ -53,9 +53,6 @@ sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystem
 mkinitcpio -p linux-lts
 # downloading and putting xorg.conf to /etc/X11
 curl -L https://github.com/71zenith/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
-# asking for password
-passwd
-passwd zenith71
 # downloading post post install script and putting it in home folder of user
 curl -L https://github.com/71zenith/autoarch/raw/master/postpost > /home/zenith71/postpost
 # running the script as the user
@@ -64,3 +61,6 @@ su -c "sh /home/zenith71/postpost" zenith71
 chsh zenith71 -s /bin/zsh
 # cleanup
 rm -rf /home/zenith71/{.bash_history,.bash_profile,.bash_logout,.bashrc,postpost}
+# asking for password
+passwd
+passwd zenith71

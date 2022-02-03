@@ -2,7 +2,7 @@
 # setting up cron jobs
 echo "*/30 * * * *  /home/zenith71/.local/bin/notify_update" | crontab -
 # making directories
-mkdir -p ~/pix ~/dl ~/mc ~/stuff
+mkdir -p ~/pix ~/dl ~/mc ~/stuff ~/.cache/zsh
 # cloning the dotfiles repo and moving it to ~/.config
 git clone https://github.com/71zenith/dotfiles.git ~/dotfiles
 cp -r ~/dotfiles/. ~/.config/
