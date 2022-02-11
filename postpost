@@ -30,12 +30,6 @@ cd /tmp
 git clone https://github.com/hoyon/mpv-mpris
 cd mpv-mpris
 doas make install
-# setting mpv-discord
-cd /tmp
-git clone https://github.com/tnychn/mpv-discord.git
-cd mpv-discord
-./install_linux.sh
-sed 's/^binary_path.*/binary_path=\/home\/zenith71\/\.config\/mpv\/discord/' ~/.config/mpv/script-opts/discord.conf -i
 # setting up the url for push
 cd ~/stuff/autoarch
 git remote set-url origin git@github.com:71zenith/autoarch
