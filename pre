@@ -20,7 +20,7 @@ mount /dev/sdb4 /mnt/home
 swapon /dev/sdb2
  
 # installing the base system
-pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager nvidia-lts opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot openssh sxhkd sxiv terminus-font ttf-jetbrains-mono xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels discord dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman pulseaudio-bluetooth alacritty zsh bat ueberzug starship ccls patch
+pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager nvidia-lts opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot openssh sxhkd sxiv terminus-font ttf-jetbrains-mono xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels discord dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman pulseaudio-bluetooth alacritty zsh bat ueberzug starship ccls patch  newsboat
 
 # generating the fstab file
 genfstab -U /mnt >> /mnt/etc/fstab

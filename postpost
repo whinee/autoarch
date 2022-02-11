@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 # setting up cron jobs
-echo "*/30 * * * *  /home/zenith71/.local/bin/notify_update" | crontab -
+echo -e "*/30 * * * *  /home/zenith71/.local/bin/notify_update\n*/30 * * * *  /usr/bin/newsboat -x reload" | crontab -
 # making directories
 mkdir -p ~/pix ~/dl ~/mc ~/stuff ~/.cache/zsh
 # cloning the dotfiles repo and moving it to ~/.config
