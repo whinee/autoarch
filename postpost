@@ -19,7 +19,6 @@ git clone https://github.com/71zenith/71zenith profile
 git clone https://github.com/71zenith/71zenith.github.io startpage
 git clone https://github.com/71zenith/slock
 git clone https://github.com/71zenith/dmenu
-git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 # compiling clipmenu
 cd /tmp
 git clone https://github.com/cdown/clipmenu

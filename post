@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # setting the locale and timezone
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
@@ -61,6 +61,3 @@ su -c "sh /home/zenith71/postpost" zenith71
 chsh zenith71 -s /bin/zsh
 # cleanup
 rm -rf /home/zenith71/{.bash_history,.bash_profile,.bash_logout,.bashrc,postpost}
-# asking for password
-passwd
-passwd zenith71
