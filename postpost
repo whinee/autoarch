@@ -19,6 +19,10 @@ git clone https://github.com/71zenith/71zenith profile
 git clone https://github.com/71zenith/71zenith.github.io startpage
 git clone https://github.com/71zenith/slock
 git clone https://github.com/71zenith/dmenu
+# setting prompt
+cd ~/
+git clone https://github.com/spaceship-prompt/spaceship-prompt.git --depth=1 ~/.config/zsh/functions/spaceship/
+ln -sf /home/zenith71/.config/zsh/functions/spaceship/spaceship.zsh /home/zenith71/.config/zsh/functions/prompt_spaceship_setup
 # compiling clipmenu
 cd /tmp
 git clone https://github.com/cdown/clipmenu
