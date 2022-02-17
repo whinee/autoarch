@@ -32,13 +32,32 @@ reset=$(tput sgr0)
 user="whine"
 host="blackspace"
 timezone="Asia/Manila"
-root="/dev/sdb3"
-boot="/dev/sdb1"
-home="/dev/sdb4"
-swap="/dev/sdb2"
+boot="/dev/sda1"
+root="/dev/sda2"
+home="/dev/sda3"
 echo "Enter password"
 read pass
 clear
+
+# BODGEEEEEEEE!
+fdisk << EOF
+n
+p
+
+
++512M
+n
+p
+2
+
++10G
+n
+p
+3
+
+
+w
+EOF
 
 # Changing some settings in /etc/pacman.conf
 sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 5\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
@@ -48,14 +67,12 @@ reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
 
 # preparing the disks
 mkfs.fat -F32 "$boot"
-mkswap "$swap" -L "Swap"
 yes | mkfs.ext4 "$root" -L "Arch"
 yes | mkfs.ext4 "$home"
 mount "$root" /mnt
 mkdir /mnt/{boot,home}
 mount "$boot" /mnt/boot
 mount "$home" /mnt/home
-swapon "$swap"
 
 # installing the base system
 pacstrap /mnt base bspwm git linux-lts man moc neovim networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
@@ -102,7 +119,7 @@ Depends = dash" > /usr/share/libalpm/hooks/dashbinsh.hook
 # setting up systemd-boot
 bootctl install
 echo -e "default arch.conf\ntimeout 0" > /boot/loader/loader.conf
-echo -e "title   Arch Linux\nlinux   /vmlinuz-linux-lts\ninitrd  /amd-ucode.img\ninitrd  /initramfs-linux-lts.img\noptions root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
+echo -e "title   Arch Linux\nlinux   /vmlinuz-linux-lts\ninitrd  /initramfs-linux-lts.img\noptions root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
 
 # setting ZDOTDIR
 echo "ZDOTDIR=/home/${user}/.config/zsh" >> /etc/environment
@@ -125,7 +142,7 @@ sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownlo
 
 ## Setup gpg and server for installing ssublime text
 curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
-echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" | tee -a /etc/pacman.conf
+echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
 
 # setting mkinitcpio for hibernating
 sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -e 's/vim.*/vim:ft=sh/' -i /etc/mkinitcpio.conf
@@ -136,8 +153,6 @@ curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.
 
 # running the script as the user
 su "${user}" -c "/bin/bash -e <<-EOE
-# setting up cron jobs
-echo -e "*/30 * * * *  /home/${user}/.local/bin/notify_update\n*/30 * * * *  /usr/bin/newsboat -x reload" | crontab -
 
 # making directories
 mkdir -p ~/pix ~/dl ~/mc ~/stuff ~/.cache/zsh
