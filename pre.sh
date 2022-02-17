@@ -41,10 +41,10 @@ read pass
 clear
 
 # Changing some settings in /etc/pacman.conf
-sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
+sed -e 's/CheckSpace/#CheckSpace\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
 
 # pulling down good mirrors
-reflector --country Singapore --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
+reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
 
 # preparing the disks
 mkfs.fat -F32 "$boot"
@@ -58,10 +58,10 @@ mount "$home" /mnt/home
 swapon "$swap"
 
 # installing the base system
-pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager nvidia-lts opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
+pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
   openssh sxhkd sxiv terminus-font ttf-hanazono xorg-server man-pages xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron \
   pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels discord dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman \
-  pulseaudio-bluetooth alacritty zsh bat ueberzug ccls patch newsboat
+  pulseaudio-bluetooth alacritty zsh bat ccls patch
 
 # generating the fstab file
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -122,8 +122,10 @@ pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
 pacman-key --lsign-key FBA220DFC880C036
 pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
-pacman -Sy --noconfirm zoom polybar lf brave-bin picom-ibhagwan-git
-yes | pacman -S libxft-bgra
+
+## Setup gpg and server for installing ssublime text
+curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
+echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" | tee -a /etc/pacman.conf
 
 # setting mkinitcpio for hibernating
 sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -e 's/vim.*/vim:ft=sh/' -i /etc/mkinitcpio.conf
