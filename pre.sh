@@ -3,7 +3,7 @@
 ###############################################################################
 #                                                                             #
 # autoarch: auto-install stuff                                                #
-# Copyright (C) 2022 zenith71                                                 #
+# Copyright (C) 2022 71zenith                                                 #
 # Copyright (C) 2022 whinee                                                   #
 #                                                                             #
 # This program is free software: you can redistribute it and/or modify        #
@@ -44,7 +44,7 @@ clear
 sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
 
 # pulling down good mirrors
-reflector --country China,India --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
+reflector --country Singapore --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
 
 # preparing the disks
 mkfs.fat -F32 "$boot"

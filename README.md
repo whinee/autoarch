@@ -21,7 +21,9 @@ If you think that something could be written in a better way then, do a pull req
 ### GPLv3
 
 autoarch: auto-install stuff
-Copyright (C) 2022 zenith71
+
+Copyright (C) 2022 71zenith
+
 Copyright (C) 2022 whinee
 
 This program is free software: you can redistribute it and/or modify
