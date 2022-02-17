@@ -37,7 +37,7 @@ root="/dev/sda2"
 home="/dev/sda3"
 
 # BODGEEEEEEEE!
-fdisk << EOF
+fdisk /dev/sda << EOF
 n
 p
 
