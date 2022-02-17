@@ -41,7 +41,7 @@ read pass
 clear
 
 # Changing some settings in /etc/pacman.conf
-sed -e 's/CheckSpace/#CheckSpace\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 5\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
 
 # pulling down good mirrors
 reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
@@ -58,9 +58,9 @@ mount "$home" /mnt/home
 swapon "$swap"
 
 # installing the base system
-pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
+pacstrap /mnt base bspwm git linux-lts man moc neovim networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
   openssh sxhkd sxiv terminus-font ttf-hanazono xorg-server man-pages xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron \
-  pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels discord dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman \
+  pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman \
   pulseaudio-bluetooth alacritty zsh bat ccls patch
 
 # generating the fstab file
