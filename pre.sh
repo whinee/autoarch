@@ -35,9 +35,6 @@ timezone="Asia/Manila"
 boot="/dev/sda1"
 root="/dev/sda2"
 home="/dev/sda3"
-echo "Enter password"
-read pass
-clear
 
 # BODGEEEEEEEE!
 fdisk << EOF
@@ -58,6 +55,10 @@ p
 
 w
 EOF
+
+echo "Enter password"
+read pass
+clear
 
 # Changing some settings in /etc/pacman.conf
 sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 5\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
