@@ -61,7 +61,7 @@ read pass
 clear
 
 # Changing some settings in /etc/pacman.conf
-sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 5\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 25\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
 
 # pulling down good mirrors
 reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
