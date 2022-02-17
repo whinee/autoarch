@@ -1,26 +1,53 @@
 #!/bin/sh
+
+###############################################################################
+#                                                                             #
+# autoarch: auto-install stuff                                                #
+# Copyright (C) 2022 zenith71                                                 #
+# Copyright (C) 2022 whinee                                                   #
+#                                                                             #
+# This program is free software: you can redistribute it and/or modify        #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation, either version 3 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# This program is distributed in the hope that it will be useful,             #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.      #
+#                                                                             #
+###############################################################################
+
 # Setting the tty font
 setfont ter-122n
 
 # Changing some settings in pacman.conf(5)
-sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 20\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
 
 # pulling down good mirrors
 reflector --country China,India --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
 
+# Swapfile
+dd if=/dev/zero of=/swapfile bs=1G count=15 status=progress
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo -e '\n/swapfile none swap defaults 0 0' >> /etc/fstab
+
 # preparing the disks
 mkfs.fat -F32 /dev/sdb1
-mkswap /dev/sdb2 -L "Swap"
-yes | mkfs.ext4 /dev/sdb3 -L "Arch"
-yes | mkfs.ext4 /dev/sdb4
-mount /dev/sdb3 /mnt
+yes | mkfs.ext4 /dev/sdb2 -L "Arch"
+yes | mkfs.ext4 /dev/sdb3
+mount /dev/sdb2 /mnt
 mkdir /mnt/{boot,home}
 mount /dev/sdb1 /mnt/boot
-mount /dev/sdb4 /mnt/home
-swapon /dev/sdb2
+mount /dev/sdb3 /mnt/home
 
 # installing the base system
-pacstrap /mnt amd-ucode base bspwm git linux-lts man moc neovim networkmanager nvidia-lts opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot openssh sxhkd sxiv terminus-font ttf-jetbrains-mono xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels discord dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman pulseaudio-bluetooth alacritty zsh bat ueberzug ccls patch newsboat
+pacstrap /mnt amd-ucode base bspwm git linux-lts man moc networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot openssh sxhkd sxiv terminus-font xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman pulseaudio-bluetooth alacritty zsh bat ueberzug ccls patch newsboat
 
 # generating the fstab file
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -30,9 +57,12 @@ cp -f /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
 # downloading and putting the post chroot script to /mnt
 curl -L https://github.com/71zenith/autoarch/raw/master/post > /mnt/post
+
 # running post chroot script inside of /mnt
 arch-chroot /mnt sh post
+
 # cleanup
 rm -rf /mnt/post
+
 # rebooting the system
 reboot
