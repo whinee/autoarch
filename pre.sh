@@ -21,89 +21,193 @@
 #                                                                             #
 ###############################################################################
 
-# Setting the tty font
+# SET TTY FONT
 setfont ter-122n
 
-# colors
+###############################################################################
+
+# SET VARIABLES
+
+###############################################################################
+
+## ASK USER THE PASSWORD
+echo "Enter password"
+read -s pass
+clear
+
+## COLORS
 green=$(tput setaf 2)
 reset=$(tput sgr0)
 
-# options
+## OPTIONS
 user="whine"
 host="blackspace"
 timezone="Asia/Manila"
 boot="/dev/sda1"
-root="/dev/sda2"
-home="/dev/sda3"
+swap="/dev/sda2"
+root="/dev/sda3"
 
-# BODGEEEEEEEE!
+###############################################################################
+
+
+
+###############################################################################
+
+# SETUP THE DISKS
+
+###############################################################################
+
+## PARTITION DISK
 fdisk /dev/sda << EOF
+g
 n
-p
 
 
 +512M
 n
-p
-2
 
-+10G
+
++16G
 n
-p
-3
 
 
+
+t
+1
+1
+t
+2
+19
 w
 EOF
 
-echo "Enter password"
-read pass
-clear
+#══════════════════════════════════════════════════════════#
+## SETUP PARTITIONS
+#══════════════════════════════════════════════════════════#
 
-# Changing some settings in /etc/pacman.conf
-sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 25\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -i /etc/pacman.conf
-
-# pulling down good mirrors
-reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
-
-# preparing the disks
+### BOOT
 mkfs.fat -F32 "$boot"
+mkdir /mnt/boot
+mount  /mnt/boot
+
+### SWAP
+mkswap "$swap"
+
+### ROOT
 yes | mkfs.ext4 "$root" -L "Arch"
-yes | mkfs.ext4 "$home"
 mount "$root" /mnt
-mkdir /mnt/{boot,home}
-mount "$boot" /mnt/boot
-mount "$home" /mnt/home
 
-# installing the base system
-pacstrap /mnt base bspwm git linux-lts man moc neovim networkmanager opendoas playerctl pulseaudio pulseaudio-alsa pulsemixer scrot \
-  openssh sxhkd sxiv terminus-font ttf-hanazono xorg-server man-pages xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xwallpaper zathura-pdf-poppler cron \
-  pop-gtk-theme pop-icon-theme xsel make pkgconf clipnotify ttf-joypixels dunst ffmpeg yt-dlp zip unzip mpv dash shellcheck gcc bluez blueman \
-  pulseaudio-bluetooth alacritty zsh bat ccls patch
+#══════════════════════════════════════════════════════════#
 
-# generating the fstab file
-genfstab -U /mnt >> /mnt/etc/fstab
+###############################################################################
 
-# putting the mirrorlist to system so that i don't need to run it again
+
+
+###############################################################################
+
+# PACMAN!
+
+###############################################################################
+
+## PULL GOOD MIRRORS
+reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
 cp -f /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
-# setting /mnt
-arch-chroot /mnt /bin/bash -e <<-EOF
-# setting the locale and timezone
+## ADD chaotic-aur REPO
+pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+pacman-key --lsign-key FBA220DFC880C036
+pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+## MODIFY pacman.conf
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 25\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
+
+## SETUP GPG FOR sublime-text
+curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
+echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
+
+## INSTALL BASE SYSTEM AND PACKAGES
+pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rpi-imager-git rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
+
+###############################################################################
+
+
+
+###############################################################################
+
+# SET UP STUFF
+
+###############################################################################
+
+## SET /mnt
+arch-chroot /mnt
+
+## DOWNLOAD xorg.conf AND SET IT UP
+curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
+
+## SET TIMEZONE AND HARDWARE CLOCK
 ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime
+hwclock --systohc
+
+## SET LANGUAGE
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-# setting the hostname and hosts file
-echo "${host}" >> /etc/hostname
-echo -e "127.0.0.1    localhost\n::1          localhost\n127.0.1.1    ${host}" >> /etc/hosts
+## SET USER
+useradd -m "${user}" -G wheel,audio,video
+echo "$user:$pass" | chpasswd
+echo "root:$pass" | chpasswd
 
-# setting up doas
+## SET HOSTNAME AND HOSTS FILE
+echo "${host}" >> /etc/hostname
+echo "127.0.0.1    localhost
+::1          localhost
+127.0.1.1    ${host}" >> /etc/hosts
+
+## SETUP systemd-boot
+bootctl install
+echo "default arch.conf
+timeout 0" > /boot/loader/loader.conf
+echo "title   Arch Linux
+linux   /vmlinuz-linux-lts
+initrd  /initramfs-linux-lts.img
+options root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
+
+## SET UP DOAS AS REPLACEMENT FOR SUDO
 echo "permit :wheel
 permit nopass :wheel" >> /etc/doas.conf
+ln -s /bin/doas /bin/sudo
 
-# changing /bin/sh to dash
+## SET ENV VARS
+echo "ZDOTDIR=/home/${user}/.config/zsh" >> /etc/environment
+
+###############################################################################
+
+
+
+###############################################################################
+
+# ENABLE STUFF
+
+###############################################################################
+
+## HIBERNATION
+sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -i /etc/mkinitcpio.conf
+mkinitcpio -p linux-lts
+
+## SERVICES
+systemctl enable NetworkManager
+systemctl enable cronie.service
+systemctl enable bluetooth.service
+
+###############################################################################
+
+
+
+# GENERATE fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# REPLACE sh WITH dash
 ln -sfT dash /usr/bin/sh
 echo "[Trigger]
 Type = Package
@@ -117,93 +221,111 @@ When = PostTransaction
 Exec = /usr/bin/ln -sfT dash /usr/bin/sh
 Depends = dash" > /usr/share/libalpm/hooks/dashbinsh.hook
 
-# setting up systemd-boot
-bootctl install
-echo -e "default arch.conf\ntimeout 0" > /boot/loader/loader.conf
-echo -e "title   Arch Linux\nlinux   /vmlinuz-linux-lts\ninitrd  /initramfs-linux-lts.img\noptions root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
+# SET DEFAULT SHELL TO zsh
+chsh "${user}" -s /bin/zsh
 
-# setting ZDOTDIR
-echo "ZDOTDIR=/home/${user}/.config/zsh" >> /etc/environment
 
-# enabling services
-systemctl enable NetworkManager
-systemctl enable cronie.service
-systemctl enable bluetooth.service
 
-# setting the user
-useradd -m "${user}" -G wheel,audio,video
-echo "$user:$pass" | chpasswd
-echo "root:$pass" | chpasswd
+###############################################################################
 
-# adding chaotic-aur repo and downloading packages
-pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
-pacman-key --lsign-key FBA220DFC880C036
-pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 10\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
+# INSTALL STUFF
 
-## Setup gpg and server for installing ssublime text
-curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
-echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
+###############################################################################
 
-# setting mkinitcpio for hibernating
-sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -e 's/vim.*/vim:ft=sh/' -i /etc/mkinitcpio.conf
-mkinitcpio -p linux-lts
+#══════════════════════════════════════════════════════════#
+## FROM SOURCE
+#══════════════════════════════════════════════════════════#
 
-# downloading and putting xorg.conf to /etc/X11
-curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
+#—————————————————————————————————————#
+### /tmp
+#—————————————————————————————————————#
 
-# running the script as the user
-su "${user}" -c "/bin/bash -e <<-EOE
+cd /tmp/
 
-# making directories
-mkdir -p ~/pix ~/dl ~/mc ~/stuff ~/.cache/zsh
+#### PACKAGE QUERY
+git clone https://aur.archlinux.org/package-query.git
+cd package-query/
+makepkg -si --noconfirm
+cd .. && rm -rf package-query
 
-# setting fonts
-curl -L "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Ligatures/Regular/complete/JetBrains%20Mono%20Regular%20Nerd%20Font%20Complete%20Mono.ttf" -o ~/.local/share/fonts/JetBrains\ Mono\ Regular\ Nerd\ Font\ Complete\ Mono.ttf
+#### PYTHON
+mkdir python/
+wget -O python.tgz https://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
+tar xzf python.tgz --directory python --strip-components 1
+cd python/
+./configure
+make
+make install
+cd .. && rm -rf python.tgz python/
 
-# setting prompt
-cd ~/
+#### YAOURT
+git clone https://aur.archlinux.org/yaourt.git
+cd yaourt/
+makepkg -si --noconfirm
+echo -e "NOCONFIRM=1\nBUILD_NOCONFIRM=1\nEDITFILES=0" >> ~/.config/.yaourtrc
+cd .. && rm -rf yaourt/
+
+#### NPM
+curl -qL https://www.npmjs.com/install.sh | sh
+
+#### BETTER DISCORD
+git clone https://github.com/BetterDiscord/BetterDiscord.git
+npm install
+npm run build
+npm run inject canary
+cd .. && rm -rf BetterDiscord/
+
+#### SNAP
+git clone https://aur.archlinux.org/snapd.git
+cd snapd
+makepkg -si --noconfirm
+systemctl enable --now snapd.socket
+ln -s /var/lib/snapd/snap /snap
+modprobe loop
+cd .. && rm -rf snapd
+
+cd ~
+
+#—————————————————————————————————————#
+
+#—————————————————————————————————————#
+### /opt
+#—————————————————————————————————————#
+
+cd /opt
+
+#### YAY
+git clone https://aur.archlinux.org/yay.git
+chown -R "$USER:" yay/
+cd yay
+makepkg -si --noconfirm
+
+cd ~
+
+#—————————————————————————————————————#
+
+#—————————————————————————————————————#
+### misc
+#—————————————————————————————————————#
+
+### PROMPT
 git clone https://github.com/spaceship-prompt/spaceship-prompt.git --depth=1 ~/.config/zsh/functions/spaceship/
 ln -sf /home/${user}/.config/zsh/functions/spaceship/spaceship.zsh /home/${user}/.config/zsh/functions/prompt_spaceship_setup
 
-# compiling clipmenu
-cd /tmp
-git clone https://github.com/cdown/clipmenu
-cd clipmenu
-doas make install
+#—————————————————————————————————————#
 
-# compiling mpv-mpris
-cd /tmp
-git clone https://github.com/hoyon/mpv-mpris
-cd mpv-mpris
-doas make install
+#══════════════════════════════════════════════════════════#
 
-# compiling dmenu
-cd ~/stuff/dmenu
-git remote set-url origin git@github.com:71zenith/dmenu
-make
-doas make install
+## THROUGH YAOURT
+yes | yaourt -S discord_arch_electron discord-canary-electron-bin discord-ptb insomnia pamac-aur scrcpy visual-studio-code-bin
 
-# compiling slock
-cd ~/stuff/slock
-git remote set-url origin git@github.com:71zenith/slock
-make
-doas make install
+## THROUGH SNAP
+snap install drawio
 
-# compiling st
-cd ~/stuff/st
-git remote set-url origin git@github.com:71zenith/st
-make
-doas make install
+################################################################################
 
-EOE
+# CLEANUP
+rm -rf /home/${user}/{.bash_history,.bash_profile,.bash_logout,.bashrc}
 
-# changing the default shell of user to zsh
-chsh "${user}" -s /bin/zsh
-
-# cleanup
-rm -rf /home/${user}/{.bash_history,.bash_profile,.bash_logout,.bashrc,postpost.sh}
-EOF
-
-# rebooting the system
+# REBOOT
 reboot
