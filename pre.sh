@@ -128,7 +128,8 @@ curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add s
 echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
 
 ## INSTALL BASE SYSTEM AND PACKAGES
-pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
+pacstrap /mnt base linux linux-firmware
+# pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
 
 ###############################################################################
 
@@ -136,37 +137,46 @@ pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromiu
 
 ###############################################################################
 
-# SET UP STUFF
+# CHROOT
 
 ###############################################################################
 
-## SET /mnt
 arch-chroot /mnt
 
-## DOWNLOAD xorg.conf AND SET IT UP
+#══════════════════════════════════════════════════════════#
+## SETUP STUFF
+#══════════════════════════════════════════════════════════#
+
+pacman -Syy --noconfirm dosfstools efibootmgr grub mtools os-prober
+mkdir /boot/EFI
+mount $boot /boot/EFI
+grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+
+### DOWNLOAD xorg.conf AND SET IT UP
 curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
 
-## SET TIMEZONE AND HARDWARE CLOCK
+### SET TIMEZONE AND HARDWARE CLOCK
 ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime
 hwclock --systohc
 
-## SET LANGUAGE
+### SET LANGUAGE
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-## SET USER
+### SET USER
 useradd -m "${user}" -G wheel,audio,video
 echo "$user:$pass" | chpasswd
 echo "root:$pass" | chpasswd
 
-## SET HOSTNAME AND HOSTS FILE
+### SET HOSTNAME AND HOSTS FILE
 echo "${host}" >> /etc/hostname
 echo "127.0.0.1    localhost
 ::1          localhost
 127.0.1.1    ${host}" >> /etc/hosts
 
-## SETUP systemd-boot
+### SETUP systemd-boot
 bootctl install
 echo "default arch.conf
 timeout 0" > /boot/loader/loader.conf
@@ -175,41 +185,18 @@ linux   /vmlinuz-linux-lts
 initrd  /initramfs-linux-lts.img
 options root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
 
-## SET UP DOAS AS REPLACEMENT FOR SUDO
+### SET UP DOAS AS REPLACEMENT FOR SUDO
 echo "permit :wheel
 permit nopass :wheel" >> /etc/doas.conf
 ln -s /bin/doas /bin/sudo
 
-## SET ENV VARS
+### SET ENV VARS
 echo "ZDOTDIR=/home/${user}/.config/zsh" >> /etc/environment
 
-###############################################################################
-
-
-
-###############################################################################
-
-# ENABLE STUFF
-
-###############################################################################
-
-## HIBERNATION
-sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -i /etc/mkinitcpio.conf
-mkinitcpio -p linux-lts
-
-## SERVICES
-systemctl enable NetworkManager
-systemctl enable cronie.service
-systemctl enable bluetooth.service
-
-###############################################################################
-
-
-
-# GENERATE fstab
+### GENERATE fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# REPLACE sh WITH dash
+### REPLACE sh WITH dash
 ln -sfT dash /usr/bin/sh
 echo "[Trigger]
 Type = Package
@@ -223,61 +210,75 @@ When = PostTransaction
 Exec = /usr/bin/ln -sfT dash /usr/bin/sh
 Depends = dash" > /usr/share/libalpm/hooks/dashbinsh.hook
 
-# SET DEFAULT SHELL TO zsh
+### SET DEFAULT SHELL TO zsh
 chsh "${user}" -s /bin/zsh
 
-
-
-###############################################################################
-
-# INSTALL STUFF
-
-###############################################################################
+#══════════════════════════════════════════════════════════#
 
 #══════════════════════════════════════════════════════════#
-## FROM SOURCE
+## ENABLE STUFF
+#══════════════════════════════════════════════════════════#
+
+### HIBERNATION
+sed -e 's/^HOOKS.*/HOOKS=(base udev autodetect keyboard modconf block filesystems resume fsck)/' -i /etc/mkinitcpio.conf
+mkinitcpio -p linux-lts
+
+### SERVICES
+systemctl enable NetworkManager
+systemctl enable cronie.service
+systemctl enable bluetooth.service
+
+#══════════════════════════════════════════════════════════#
+
+#══════════════════════════════════════════════════════════#
+## INSTALL STUFF
 #══════════════════════════════════════════════════════════#
 
 #—————————————————————————————————————#
-### /tmp
+### FROM SOURCE
 #—————————————————————————————————————#
+
+#-----------------#
+#### /tmp
+#-----------------#
 
 cd /tmp/
 
-#### PACKAGE QUERY
+##### PACKAGE QUERY
 git clone https://aur.archlinux.org/package-query.git
 cd package-query/
 makepkg -si --noconfirm
 cd .. && rm -rf package-query
 
-#### PYTHON
-mkdir python/
-wget -O python.tgz https://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
-tar xzf python.tgz --directory python --strip-components 1
-cd python/
-./configure
-make
-make install
-cd .. && rm -rf python.tgz python/
+##### PYTHON
+# NOTE: enable if necessary
+# mkdir python/
+# wget -O python.tgz https://www.python.org/ftp/python/3.10.2/Python-3.10.2.tgz
+# tar xzf python.tgz --directory python --strip-components 1
+# cd python/
+# ./configure
+# make
+# make install
+# cd .. && rm -rf python.tgz python/
 
-#### YAOURT
+##### YAOURT
 git clone https://aur.archlinux.org/yaourt.git
 cd yaourt/
 makepkg -si --noconfirm
 echo -e "NOCONFIRM=1\nBUILD_NOCONFIRM=1\nEDITFILES=0" >> ~/.config/.yaourtrc
 cd .. && rm -rf yaourt/
 
-#### NPM
+##### NPM
 curl -qL https://www.npmjs.com/install.sh | sh
 
-#### BETTER DISCORD
+##### BETTER DISCORD
 git clone https://github.com/BetterDiscord/BetterDiscord.git
 npm install
 npm run build
 npm run inject canary
 cd .. && rm -rf BetterDiscord/
 
-#### SNAP
+##### SNAP
 git clone https://aur.archlinux.org/snapd.git
 cd snapd
 makepkg -si --noconfirm
@@ -288,15 +289,15 @@ cd .. && rm -rf snapd
 
 cd ~
 
-#—————————————————————————————————————#
+#-----------------#
 
-#—————————————————————————————————————#
-### /opt
-#—————————————————————————————————————#
+#-----------------#
+#### /opt
+#-----------------#
 
 cd /opt
 
-#### YAY
+##### YAY
 git clone https://aur.archlinux.org/yay.git
 chown -R "$USER:" yay/
 cd yay
@@ -304,30 +305,34 @@ makepkg -si --noconfirm
 
 cd ~
 
-#—————————————————————————————————————#
+#-----------------#
 
-#—————————————————————————————————————#
-### misc
-#—————————————————————————————————————#
+#-----------------#
+#### MISCELLANEOUS
+#-----------------#
 
-### PROMPT
+#### PROMPT
 git clone https://github.com/spaceship-prompt/spaceship-prompt.git --depth=1 ~/.config/zsh/functions/spaceship/
 ln -sf /home/${user}/.config/zsh/functions/spaceship/spaceship.zsh /home/${user}/.config/zsh/functions/prompt_spaceship_setup
 
+#-----------------#
+
 #—————————————————————————————————————#
+
+### THROUGH YAOURT
+yes | yaourt -S discord_arch_electron discord-canary-electron-bin discord-ptb insomnia pamac-aur scrcpy visual-studio-code-bin
+
+### THROUGH SNAP
+snap install drawio
 
 #══════════════════════════════════════════════════════════#
 
-## THROUGH YAOURT
-yes | yaourt -S discord_arch_electron discord-canary-electron-bin discord-ptb insomnia pamac-aur scrcpy visual-studio-code-bin
-
-## THROUGH SNAP
-snap install drawio
+## CLEANUP & EXIT
+rm -rf /home/${user}/{.bash_history,.bash_profile,.bash_logout,.bashrc}
+exit
+umount /mnt
 
 ################################################################################
-
-# CLEANUP
-rm -rf /home/${user}/{.bash_history,.bash_profile,.bash_logout,.bashrc}
 
 # REBOOT
 reboot
