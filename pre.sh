@@ -30,6 +30,12 @@ setfont ter-122n
 
 ###############################################################################
 
+## ASK USER THE PASSWORD
+clear
+echo "Enter password"
+read -s pass
+clear
+
 ## COLORS
 green=$(tput setaf 2)
 reset=$(tput sgr0)
@@ -87,6 +93,7 @@ mount  /mnt/boot
 
 ### SWAP
 mkswap "$swap"
+swapon "$swap"
 
 ### ROOT
 yes | mkfs.ext4 "$root" -L "Arch"
@@ -95,14 +102,6 @@ mount "$root" /mnt
 #══════════════════════════════════════════════════════════#
 
 ###############################################################################
-
-
-
-# ASK USER THE PASSWORD
-clear
-echo "Enter password"
-read -s pass
-clear
 
 
 
@@ -132,6 +131,11 @@ pacstrap /mnt base linux linux-firmware
 # pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
 
 ###############################################################################
+
+
+
+# GENERATE fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
 
 
@@ -192,9 +196,6 @@ ln -s /bin/doas /bin/sudo
 
 ### SET ENV VARS
 echo "ZDOTDIR=/home/${user}/.config/zsh" >> /etc/environment
-
-### GENERATE fstab
-genfstab -U /mnt >> /mnt/etc/fstab
 
 ### REPLACE sh WITH dash
 ln -sfT dash /usr/bin/sh
