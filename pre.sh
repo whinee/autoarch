@@ -21,20 +21,11 @@
 #                                                                             #
 ###############################################################################
 
-# SET TTY FONT
-setfont ter-122n
-
 ###############################################################################
 
 # SET VARIABLES
 
 ###############################################################################
-
-## ASK USER THE PASSWORD
-clear
-echo "Enter password"
-read -s pass
-clear
 
 ## COLORS
 green=$(tput setaf 2)
@@ -112,7 +103,8 @@ mount "$root" /mnt
 ###############################################################################
 
 ## PULL GOOD MIRRORS
-reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist 2> /dev/null
+reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+cp -f /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
 ## ADD chaotic-aur REPO
 pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
@@ -145,7 +137,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 ###############################################################################
 
-arch-chroot /mnt
+arch-chroot /mnt << EOF
 
 #══════════════════════════════════════════════════════════#
 ## SETUP STUFF
@@ -171,8 +163,8 @@ echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 ### SET USER
 useradd -m "${user}" -G wheel,audio,video
-echo "$user:$pass" | chpasswd
-echo "root:$pass" | chpasswd
+echo "$user:$1" | chpasswd
+echo "root:$1" | chpasswd
 
 ### SET HOSTNAME AND HOSTS FILE
 echo "${host}" >> /etc/hostname
@@ -330,10 +322,10 @@ snap install drawio
 
 ## CLEANUP & EXIT
 rm -rf /home/${user}/{.bash_history,.bash_profile,.bash_logout,.bashrc}
-exit
-umount /mnt
+EOF
 
 ################################################################################
 
-# REBOOT
-reboot
+# UNMOUNT & REBOOT
+umount -R /mnt
+shutdown now
