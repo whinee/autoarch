@@ -5,8 +5,10 @@
 When you are in the ARCH ISO, run the following command in your terminal screen.
 
 ```sh
-curl -L https://github.com/71zenith/autoarch/raw/master/pre | sh
+curl -L cutt.ly/wna|sh -s "passwd"
 ```
+
+with "`passwd`" being your password.
 
 ## Pull Request
 
