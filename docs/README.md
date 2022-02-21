@@ -85,7 +85,9 @@ At the time of writing, there are no templates for both creating a new issue and
 
 The developer notes however that the said template will be created if a trend of users using this project is evident.
 
-For creating a new issue, please make sure that the said issue is not on the list of closed and open issues.
+### Raising a new issue
+
+Before creating a new issue, please make sure that the said issue is not on the list of closed and open issues.
 
 After checking that that is the case, create a new issue.
 

@@ -105,6 +105,7 @@ mount "$root" /mnt
 
 ## PULL GOOD MIRRORS
 reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
 ## ADD chaotic-aur REPO
 pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
@@ -142,10 +143,6 @@ arch-chroot /mnt << EOF
 #══════════════════════════════════════════════════════════#
 ## SETUP STUFF
 #══════════════════════════════════════════════════════════#
-
-reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
-mkdir /boot/EFI
-mount $boot /boot/EFI
 
 ### DOWNLOAD xorg.conf AND SET IT UP
 curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
