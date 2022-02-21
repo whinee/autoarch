@@ -60,10 +60,22 @@ If you know how to properly attribute the original author of the script, please 
 When you are in the ARCH ISO, run the following command in your terminal screen.
 
 ```sh
-curl -L cutt.ly/wna|sh -s "passwd"
+curl -L waa.rf.gd|sh -s "passwd"
 ```
 
 with "`passwd`" being your password.
+
+<details>
+<summary>If it fails, try one of the following commands:</summary>
+
+```sh
+curl -L cutt.ly/wna|sh -s "passwd"
+```
+
+```sh
+curl -L github.com/whinee/autoarch/raw/master/pre.sh|sh -s "passwd"
+```
+</details>
 
 ## Contributing
 

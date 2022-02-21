@@ -85,7 +85,7 @@ mount  /mnt/boot
 ### SWAP
 mkswap "$swap"
 swapon "$swap"
-swaplabel -L Swap $swap
+swaplabel -L Swap "$swap"
 
 ### ROOT
 yes | mkfs.ext4 "$root" -L "Arch"
