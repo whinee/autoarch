@@ -105,6 +105,7 @@ mount "$root" /mnt
 
 ## PULL GOOD MIRRORS
 reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+mkdir /mnt/etc/pacman.d/
 cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
 ## ADD chaotic-aur REPO
