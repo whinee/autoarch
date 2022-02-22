@@ -45,6 +45,28 @@ root="/dev/sda3"
 
 ###############################################################################
 
+# DO STUFF
+
+###############################################################################
+
+
+#══════════════════════════════════════════════════════════#
+## SETUP DATETIME
+#══════════════════════════════════════════════════════════#
+
+timedatectl set-ntp true
+timedatectl set-timezone "$timezone"
+timedatectl status
+
+#══════════════════════════════════════════════════════════#
+
+## GENERATE fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+###############################################################################
+
+###############################################################################
+
 # SETUP THE DISKS
 
 ###############################################################################
@@ -121,17 +143,10 @@ curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add s
 echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
 
 ## INSTALL BASE SYSTEM AND PACKAGES
-pacstrap /mnt base linux linux-firmware xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot
+pacstrap /mnt base dhcpcd linux linux-firmware netctl xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot
 # pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
 
 ###############################################################################
-
-
-
-# GENERATE fstab
-genfstab -U /mnt >> /mnt/etc/fstab
-
-
 
 ###############################################################################
 
@@ -151,6 +166,7 @@ mkdir /boot/EFI
 mkdir /boot/EFI
 mount $boot /boot/EFI
 mount $boot /boot/EFI
+grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/EFI
 grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -159,23 +175,23 @@ curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.
 
 ### SET TIMEZONE AND HARDWARE CLOCK
 ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime
-hwclock --systohc
+hwclock --systohc --utc
 
 ### SET LANGUAGE
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+### SET HOSTNAME AND HOSTS FILE
+echo "${host}" > /etc/hostname
+echo "127.0.0.1    localhost
+::1          localhost
+127.0.1.1    ${host}" > /etc/hosts
 
 ### SET USER
 useradd -m "${user}" -G wheel,audio,video
 echo "$user:$1" | chpasswd
 echo "root:$1" | chpasswd
-
-### SET HOSTNAME AND HOSTS FILE
-echo "${host}" >> /etc/hostname
-echo "127.0.0.1    localhost
-::1          localhost
-127.0.1.1    ${host}" >> /etc/hosts
 
 ### SET UP DOAS AS REPLACEMENT FOR SUDO
 echo "permit :wheel
