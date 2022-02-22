@@ -144,6 +144,15 @@ arch-chroot /mnt << EOF
 ## SETUP STUFF
 #══════════════════════════════════════════════════════════#
 
+pacman -Syy --noconfirm dosfstools efibootmgr grub mtools os-prober
+reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+mkdir /boot/EFI
+mkdir /boot/EFI
+mount $boot /boot/EFI
+mount $boot /boot/EFI
+grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+
 ### DOWNLOAD xorg.conf AND SET IT UP
 curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
 
@@ -166,15 +175,6 @@ echo "${host}" >> /etc/hostname
 echo "127.0.0.1    localhost
 ::1          localhost
 127.0.1.1    ${host}" >> /etc/hosts
-
-### SETUP systemd-boot
-bootctl install
-echo "default arch.conf
-timeout 0" > /boot/loader/loader.conf
-echo "title   Arch Linux
-linux   /vmlinuz-linux-lts
-initrd  /initramfs-linux-lts.img
-options root=\"LABEL=Arch\" resume=\"LABEL=Swap\" rw" > /boot/loader/entries/arch.conf
 
 ### SET UP DOAS AS REPLACEMENT FOR SUDO
 echo "permit :wheel
