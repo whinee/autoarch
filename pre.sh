@@ -142,6 +142,8 @@ sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownlo
 curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
 echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
 
+cp /etc/pacman.conf /mnt/etc/pacman.conf
+
 ## INSTALL BASE SYSTEM AND PACKAGES
 pacstrap /mnt base dhcpcd linux linux-firmware netctl xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot
 # pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
@@ -169,9 +171,6 @@ mount $boot /boot/EFI
 grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/EFI
 grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
-
-### DOWNLOAD xorg.conf AND SET IT UP
-curl -L https://github.com/whinee/autoarch/raw/master/xorg.conf > /etc/X11/xorg.conf
 
 ### SET TIMEZONE AND HARDWARE CLOCK
 ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime
