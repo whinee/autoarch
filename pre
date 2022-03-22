@@ -1,0 +1,158 @@
+#!/bin/sh
+
+###############################################################################
+#                                                                             #
+# autoarch: auto-install stuff                                                #
+# Copyright (C) 2022 71zenith                                                 #
+# Copyright (C) 2022 whinee                                                   #
+#                                                                             #
+# This program is free software: you can redistribute it and/or modify        #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation, either version 3 of the License, or           #
+# (at your option) any later version.                                         #
+#                                                                             #
+# This program is distributed in the hope that it will be useful,             #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+# GNU General Public License for more details.                                #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.      #
+#                                                                             #
+###############################################################################
+
+###############################################################################
+
+# SET VARIABLES
+
+###############################################################################
+
+## COLORS
+green=$(tput setaf 2)
+reset=$(tput sgr0)
+
+## OPTIONS
+user="whine"
+host="blackspace"
+timezone="Asia/Manila"
+boot="/dev/sda1"
+swap="/dev/sda2"
+root="/dev/sda3"
+
+###############################################################################
+
+
+
+###############################################################################
+
+# DO STUFF
+
+###############################################################################
+
+
+#══════════════════════════════════════════════════════════#
+## SETUP DATETIME
+#══════════════════════════════════════════════════════════#
+
+timedatectl set-ntp true
+timedatectl set-timezone "$timezone"
+timedatectl status
+
+#══════════════════════════════════════════════════════════#
+
+## GENERATE fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+###############################################################################
+
+###############################################################################
+
+# SETUP THE DISKS
+
+###############################################################################
+
+## PARTITION DISK
+fdisk /dev/sda << EOF
+g
+n
+
+
++512M
+n
+
+
++16G
+n
+
+
+
+t
+1
+1
+t
+2
+19
+w
+EOF
+
+#══════════════════════════════════════════════════════════#
+## SETUP PARTITIONS
+#══════════════════════════════════════════════════════════#
+
+### BOOT
+mkfs.fat -F32 "$boot"
+mkdir /mnt/boot
+mount  /mnt/boot
+
+### SWAP
+mkswap "$swap"
+swapon "$swap"
+swaplabel -L Swap "$swap"
+
+### ROOT
+yes | mkfs.ext4 "$root" -L "Arch"
+mount "$root" /mnt
+
+#══════════════════════════════════════════════════════════#
+
+###############################################################################
+
+
+
+###############################################################################
+
+# PACMAN!
+
+###############################################################################
+
+## PULL GOOD MIRRORS
+reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+mkdir /mnt/etc/pacman.d/
+cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
+
+## ADD chaotic-aur REPO
+pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+pacman-key --lsign-key FBA220DFC880C036
+pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+## MODIFY pacman.conf
+sed -e 's/CheckSpace/#CheckSpace/' -e 's/#ParallelDownloads\ =\ 5/ParallelDownloads = 25\nILoveCandy/' -e 's/#Color/Color/' -e 's/#VerbosePkgLists/VerbosePkgLists/' -e '$a [chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' -i /etc/pacman.conf
+
+## SETUP GPG FOR sublime-text
+curl -O https://download.sublimetext.com/sublimehq-pub.gpg && pacman-key --add sublimehq-pub.gpg && pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
+echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" >> /etc/pacman.conf
+
+cp /etc/pacman.conf /mnt/etc/pacman.conf
+
+## INSTALL BASE SYSTEM AND PACKAGES
+pacstrap /mnt base dhcpcd linux linux-firmware netctl xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot
+# pacstrap /mnt alacritty base base-devel bat bleachbit blueman bluez ccls chromium clipnotify cron dash dunst ffmpeg flameshot flatpak fuse gcc gcolor3 git gnome-keyring libreoffice-fresh linux-lts make man man-pages moc moreutils mpv nano networkmanager noto-fonts-emoji npm obs-studio opendoas openssh patch pkgconf playerctl pop-gtk-theme pop-icon-theme pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulsemixer rust scrot shellcheck spectacle squashfuse sublime-text sxhkd sxiv terminus-font ttf-hanazono ttf-joypixels unzip vivaldi vivaldi-ffmpeg-codecs wget xorg-server xorg-xinit xorg-xprop xorg-xset xorg-xsetroot xsel xwallpaper yajl yt-dlp zathura-pdf-poppler zip zsh
+
+###############################################################################
+
+curl -L https://github.com/whinee/autoarch/raw/master/post > /mnt/post
+arch-chroot /mnt sh post
+
+# UNMOUNT & REBOOT
+umount -R /mnt
+shutdown now
